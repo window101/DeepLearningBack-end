@@ -1,0 +1,6 @@
+temp pass  : LWO2;8w<u%Af
+바뀐 비번 hwajun12 ? hwajun12@@
+ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'ghkwns12';
+
+mysql> select host, user, plugin, authentication_string, password_last_changed from user;
+

@@ -1,0 +1,143 @@
+1.
+
+SELECT Areaname as 지역, 
+		SpecificAreaname as 상세지역, 
+        title as 모텔이름,
+        location as 모텔위치,
+        backgroundURL as 배경이미지,
+        star as 별점,
+		commentcnt as 후기개수
+FROM eachmotel 
+INNER JOIN Reservationdesignation		ON eachmotel.ReservationdesignationID=Reservationdesignation.ReservationdesignationID
+INNER JOIN MotelSpecify 				ON Reservationdesignation.MotelSpecifyID = MotelSpecify.MotelSpecifyID
+INNER JOIN SpecificArea 				ON MotelSpecify.SpecificAreaID = SpecificArea.SpecificAreaID
+INNER JOIN Area 						ON SpecificArea.AreaID = Area.AreaID
+WHERE Area.AreaID=1;
+
+
+
+2.
+SELECT 
+	pricetype as 유형, 
+	optionalprice as 가격, 
+	typetext as 시간
+	FROM eachprice 
+	INNER JOIN eachmotel ON eachmotel.title=eachprice.title AND eachmotel.eachmotelID = eachprice.eachmotelID;
+
+
+
+3.
+select title as 모텔이름,
+		star as 별점,
+		commentcnt as 후기개수,
+        backgroundURL as 모텔사진,
+		specialpoint as 참고사항,
+        (Owner.Phone) as 모텔전번,
+        Deluxesleep as Deluxe숙박, Deluxeborrow as Deluxe대실,Premiumsleep as Premium숙박,Premiumborrow as Premium대실,
+        Suitesleep as Suite숙박, Suiteborrow as Suite대실, Royalsuitesleep as Royalsuite숙박, Royalsuiteborrow as Roytalsuite대실,
+        commoncomment as 공통사항,
+        case
+			when replycnt >= 200
+            then concat('200','+') 
+        end as 숙소답변
+        from eachmotel
+        INNER JOIN Reservationdesignation ON Reservationdesignation.ReservationdesignationID = eachmotel.ReservationdesignationID
+        INNER JOIN MotelSpecify ON MotelSpecify.MotelSpecifyID = Reservationdesignation.MotelSpecifyID
+        INNER JOIN TotalMotel ON MotelSpecify.TotalMotelID = TotalMotel.TotalMotelID
+        INNER JOIN Owner ON TotalMotel.OwnerID = Owner.OwnerID
+        INNER JOIN curlinunroomtype ON curlinunroomtype.eachmotelID = eachmotel.eachmotelID
+        where title='역삼 컬리넌' and eachmotel.eachmotelID=1;
+
+
+4.
+SELECT Deluxeborrow as Deluxe대실,
+		Premiumborrow as Premium대실,
+        Suiteborrow as Suite대실,
+        Royalsuiteborrow as Royalsuite대실,
+        (Specificborrowprice.usehours) as 대실사용시간, (Specificborrowprice.endtime) as 대실기한,
+        Deluxesleep as Deluxe숙박, Premiumsleep as Premium숙박, Suitesleep as Suite숙박, Royalsuitesleep as Royalsuite숙박,
+        (Specificsleepprice.usehours) as 숙박체크인, (Specificsleepprice.endtime) as 숙박기한,
+        Specificborrowprice.usertype as 유저, Specificborrowprice.daytype as 날짜
+FROM Specificborrowprice INNER JOIN Specificsleepprice
+ON Specificborrowprice.curlinunroomtypeID = Specificsleepprice.curlinunroomtypeID
+WHERE Specificborrowprice.SpecificborrowpriceID = Specificsleepprice.SpecificsleeppriceID;
+
+
+
+5.
+SELECT 
+		title as 상호명,
+		(eachmotel.motelintro) as 숙소소개,
+		(eachmotel.facilities) as 편의시설,
+        (eachmotel.service) as 이용안내,
+        (eachmotel.introduce) as 기본규정,
+        representativename as 대표자명, (Owner.companyaddress) as 사업자주소,
+        Phone as 연락처, companynum as 사업자등록번호
+ FROM eachmotel INNER JOIN Reservationdesignation
+ON Reservationdesignation.ReservationdesignationID=eachmotel.ReservationdesignationID
+INNER JOIN MotelSpecify ON MotelSpecify.MotelSpecifyID = Reservationdesignation.MotelSpecifyID
+INNER JOIN TotalMotel ON MotelSpecify.TotalMotelID=TotalMotel.TotalMotelID
+INNER JOIN Owner ON TotalMotel.OwnerID = Owner.OwnerID
+WHERE eachmotel.eachmotelID=1 and TotalMotel.TotalMotelID=4 and Reservationdesignation.MotelSpecifyID=1;
+
+
+
+
+6.
+
+select
+		(User.UserID) as 고객,
+		(ReservationReview.context) as 후기내용,
+        (ReservationReview.roomtype) as 방유형,
+        (ReservationReview.star) as 별점,
+		case when timestampdiff(hour,ReservationReview.createAt,current_timestamp()) < 24
+        then concat(timestampdiff(hour,ReservationReview.createAt, current_timestamp()),'시간 전' )
+        else concat(timestampdiff(day,ReservationReview.createAt, current_timestamp()),'일 전')
+        end as 고객리뷰시간
+from ReservationReview
+INNER JOIN Reviewcomment ON ReservationReview.ReviewcommentID = Reviewcomment.ReviewcommentID
+INNER JOIN User ON ReservationReview.UserID = User.UserID
+INNER JOIN Reservationlist ON Reservationlist.Reservationnum = ReservationReview.Reservationnum
+INNER JOIN eachmotel ON eachmotel.ReservationdesignationID = Reservationlist.ReservationdesignationID
+where User.UserID=1;
+
+
+7.
+select 
+		replycontext as 숙소답변 ,
+		case when timestampdiff(hour, Reviewcomment.createdAt, current_timestamp()) < 24
+        then concat(timestampdiff(hour,Reviewcomment.createdAt, current_timestamp()),'시간 전' )
+        else concat(timestampdiff(day,Reviewcomment.createdAt, current_timestamp()),'일 전')
+        end as 숙소답변시간
+		from Reviewcomment
+		INNER JOIN ReservationReview ON Reviewcomment.ReservationReviewID = ReservationReview.ReservationReviewID
+        where ReservationReview.ReviewcommentID = Reviewcomment.ReviewcommentID and 
+        ReservationReview.Reservationnum=1
+
+
+
+8.
+select 
+		Usercoupon.UserID as 유저이름,
+		(User.Mileage) as 포인트,
+        (User.coin) as 야놀자코인,
+		(housecoupon+leisurecoupon+overseacoupon)as 쿠폰함, 
+        (ReservationReview.context) as 나의후기,
+        (User.reservcnt) as 국내숙소구매내역
+        from Usercoupon
+        INNER JOIN User ON User.UserID = Usercoupon.UserID
+		INNER JOIN ReservationReview ON ReservationReview.UserID = User.UserID
+        WHERE User.UserID=1
+
+
+9.
+
+select 
+		case when Mileage >10
+        then 
+			concat('사용 가능한 포인트 :',Mileage,'p ', ',',' 15일내,소멸예정포인트 : ',(Pointexpire.15th),'p')
+        else concat(Mileage,'p')
+        end as 포인트
+from User 
+INNER JOIN Pointexpire ON Pointexpire.UserID = User.UserID
+where User.UserID=1

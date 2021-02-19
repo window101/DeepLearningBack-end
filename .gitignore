@@ -1,0 +1,7 @@
+.idea/*
+node_modules/*
+package-lock.json
+database.js
+virus_contents
+log/*
+.DS_Store
